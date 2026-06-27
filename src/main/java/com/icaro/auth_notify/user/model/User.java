@@ -56,12 +56,16 @@ public class User implements UserDetails {
     ) {
         this.name = Objects.requireNonNull(name, "user name should not be null");
         this.email = Objects.requireNonNull(email, "user email should not be null");
-        this.passwordHash = Objects.requireNonNull(passwordHash, "user password hash should not be null");
+
+        if (passwordHash != null && passwordHash.isBlank()) {
+            throw new IllegalArgumentException("user password hash should not be blank");
+        }
+        this.passwordHash = passwordHash;
+
         this.birthDate = Objects.requireNonNull(birthDate, "user birth date should not be null");
 
         if(name.isBlank()) { throw new IllegalArgumentException("user name should not be blank"); }
         if(email.isBlank()) { throw new IllegalArgumentException("user email should not be blank"); }
-        if(passwordHash.isBlank()) { throw new IllegalArgumentException("user password hash should not be blank"); }
     }
 
     // SETTERS
