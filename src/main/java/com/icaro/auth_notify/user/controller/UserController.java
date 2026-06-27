@@ -6,6 +6,7 @@ import com.icaro.auth_notify.user.model.dto.UserResponseDTO;
 import com.icaro.auth_notify.user.model.dto.UserUpdateDTO;
 import com.icaro.auth_notify.user.service.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,7 +23,8 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(
-            @RequestBody UserRequestDTO dto) {
+            @RequestBody
+            @Valid UserRequestDTO dto) {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -32,7 +34,7 @@ public class UserController {
     @PatchMapping("/me")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UserResponseDTO> updateUser(
-            @RequestBody UserUpdateDTO dto,
+            @RequestBody @Valid UserUpdateDTO dto,
             @AuthenticationPrincipal User user) {
 
         return ResponseEntity

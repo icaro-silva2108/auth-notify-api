@@ -56,10 +56,7 @@ public class AdminUserService {
     @Transactional(readOnly = true)
     public UserResponseDTO findUserById(Long id) {
 
-        return toResponseDTO(
-                userRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("user not found"))
-        );
+        return toResponseDTO(findUserOrThrow(id));
     }
 
     public UserResponseDTO changeUserRole(Long id, UserRole role) {
