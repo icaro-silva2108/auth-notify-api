@@ -1,5 +1,6 @@
 package com.icaro.auth_notify.user.service;
 
+import com.icaro.auth_notify.common.exceptions.InvalidPasswordException;
 import com.icaro.auth_notify.common.exceptions.ResourceNotFoundException;
 import com.icaro.auth_notify.user.model.User;
 import com.icaro.auth_notify.user.model.dto.UserRequestDTO;
@@ -49,10 +50,14 @@ public class UserService {
         if(userRepository.existsByEmail(dto.email())) { throw new EmailAlreadyExistsException(); }
         if(isUnderAge(dto.birthDate())) { throw new InvalidAgeException(); }
 
+        String passwordHash = dto.password() != null
+                ? passwordEncoder.encode(dto.password())
+                : null;
+
         User user = User.builder()
                 .name(dto.name())
                 .email(dto.email())
-                .passwordHash(passwordEncoder.encode(dto.password()))
+                .passwordHash(passwordHash)
                 .birthDate(dto.birthDate())
                 .build();
 
@@ -78,6 +83,9 @@ public class UserService {
         }
         if(dto.password() != null) {
 
+            if(dto.password().isBlank()) {
+                throw new InvalidPasswordException();
+            }
             user.setPasswordHash(passwordEncoder.encode(dto.password()));
         }
         if(dto.birthDate() != null) {
