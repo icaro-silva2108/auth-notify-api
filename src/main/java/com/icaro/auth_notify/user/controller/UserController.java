@@ -1,9 +1,7 @@
 package com.icaro.auth_notify.user.controller;
 
 import com.icaro.auth_notify.user.model.User;
-import com.icaro.auth_notify.user.model.dto.UserRequestDTO;
-import com.icaro.auth_notify.user.model.dto.UserResponseDTO;
-import com.icaro.auth_notify.user.model.dto.UserUpdateDTO;
+import com.icaro.auth_notify.user.model.dto.*;
 import com.icaro.auth_notify.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -13,6 +11,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final AuthenticationManager manager;
 
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(
@@ -29,6 +31,20 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(userService.createUser(dto));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDTO> userLogin(
+            @RequestBody @Valid LoginRequestDTO dto) {
+
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(dto.email(), dto.password());
+        Authentication authenticated = manager.authenticate(authToken);
+
+        User user = (User) authenticated.getPrincipal();
+
+        return ResponseEntity.ok(
+                new LoginResponseDTO(user.getId(), user.getEmail())
+        );
     }
 
     @PatchMapping("/me")
