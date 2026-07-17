@@ -1,4 +1,4 @@
-package com.icaro.auth_notify.common.security.service;
+package com.icaro.auth_notify.auth.service;
 
 import com.icaro.auth_notify.user.repository.UserRepository;
 

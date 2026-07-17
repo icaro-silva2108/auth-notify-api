@@ -1,6 +1,6 @@
 package com.icaro.auth_notify.common.security.config;
 
-import com.icaro.auth_notify.common.security.service.CustomUserDetailsService;
+import com.icaro.auth_notify.auth.service.CustomUserDetailsService;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
