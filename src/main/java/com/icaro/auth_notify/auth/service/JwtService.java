@@ -65,15 +65,16 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean isTokenExpired(String token) {
+   public boolean isTokenValid(String token, String email) {
 
-        return extractClaims(token)
-                .getExpiration()
-                .before(new Date());
-    }
+        Claims claims = extractClaims(token);
 
-   public boolean isTokenOwnerValid(String token, String email) {
-
-        return extractClaims(token).getSubject().equals(email);
+        return claims
+                    .getSubject()
+                    .equals(email)
+                &&
+                !claims
+                    .getExpiration()
+                    .before(new Date());
    }
 }

@@ -3,7 +3,9 @@ package com.icaro.auth_notify.user.controller;
 import com.icaro.auth_notify.user.model.User;
 import com.icaro.auth_notify.user.model.dto.*;
 import com.icaro.auth_notify.user.service.UserService;
+import com.icaro.auth_notify.auth.service.JwtService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,8 +23,10 @@ import org.springframework.security.core.Authentication;
 public class UserController {
 
     private final UserService userService;
+    private final JwtService jwtService;
     private final AuthenticationManager manager;
 
+    @Operation(security = {})
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(
             @RequestBody
@@ -33,6 +37,7 @@ public class UserController {
                 .body(userService.createUser(dto));
     }
 
+    @Operation(security = {})
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> userLogin(
             @RequestBody @Valid LoginRequestDTO dto) {
@@ -41,9 +46,10 @@ public class UserController {
         Authentication authenticated = manager.authenticate(authToken);
 
         User user = (User) authenticated.getPrincipal();
+        String token = jwtService.generateToken(user);
 
         return ResponseEntity.ok(
-                new LoginResponseDTO(user.getId(), user.getEmail())
+                new LoginResponseDTO(user.getId(), user.getEmail(), token)
         );
     }
 

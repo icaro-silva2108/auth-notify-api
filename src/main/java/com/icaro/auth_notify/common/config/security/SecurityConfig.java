@@ -1,6 +1,7 @@
-package com.icaro.auth_notify.common.security.config;
+package com.icaro.auth_notify.common.config.security;
 
 import com.icaro.auth_notify.auth.service.CustomUserDetailsService;
+import com.icaro.auth_notify.auth.filter.JwtAuthFilter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,10 +17,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtAuthFilter jwtAuthFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -58,14 +64,23 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth -> auth
 
+                                // APPLICATION
                                 .requestMatchers(HttpMethod.POST, "/users", "/users/login").permitAll()
                                 .requestMatchers("/users", "/users/**").authenticated()
 
                                 .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
 
+                                // SWAGGER
+                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
+                                // ACTUATOR
+                                .requestMatchers("/actuator/health", "/actuator/info/**").permitAll()
+
+                                // OTHERS
                                 .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider)
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }
