@@ -6,6 +6,7 @@ import com.icaro.auth_notify.user.model.User;
 import com.icaro.auth_notify.user.model.dto.UserRequestDTO;
 import com.icaro.auth_notify.user.model.dto.UserResponseDTO;
 import com.icaro.auth_notify.user.model.dto.UserUpdateDTO;
+import com.icaro.auth_notify.user.model.enums.AuthProvider;
 import com.icaro.auth_notify.user.repository.UserRepository;
 import com.icaro.auth_notify.common.exceptions.InvalidAgeException;
 import com.icaro.auth_notify.common.exceptions.EmailAlreadyExistsException;
@@ -60,6 +61,8 @@ public class UserService {
                 .passwordHash(passwordHash)
                 .birthDate(dto.birthDate())
                 .build();
+
+        user.getProviders().add(AuthProvider.LOCAL);
 
         User saved = userRepository.save(user);
         return toResponseDTO(saved);

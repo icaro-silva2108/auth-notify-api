@@ -14,6 +14,6 @@ public record UserUpdateDTO(
         @Size(min = 8, max = 20, message = "user password in request should have min 8 and max 20 characters")
         String password,
 
-        @Past
+        @Past(message = "user birth date in request must be in the past")
         LocalDate birthDate
 ) {}

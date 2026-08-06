@@ -1,5 +1,6 @@
 package com.icaro.auth_notify.user.model;
 
+import com.icaro.auth_notify.user.model.enums.AuthProvider;
 import com.icaro.auth_notify.user.model.enums.UserRole;
 
 import jakarta.persistence.*;
@@ -13,9 +14,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Getter
@@ -36,12 +35,22 @@ public class User implements UserDetails {
     @Column(name = "password_hash")
     private String passwordHash;
 
+    @Setter
     @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private UserRole role = UserRole.USER;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(
+            name = "tb_user_auth_provider",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Column(name = "provider")
+    private Set<AuthProvider> providers = new HashSet<>();
 
     @Setter
     @Column(name = "active", nullable = false)
@@ -52,6 +61,7 @@ public class User implements UserDetails {
             String name,
             String email,
             String passwordHash,
+            AuthProvider authProvider,
             LocalDate birthDate
     ) {
         this.name = Objects.requireNonNull(name, "user name should not be null");
@@ -90,11 +100,6 @@ public class User implements UserDetails {
 
         if(passwordHash != null && passwordHash.isBlank()) { throw new IllegalArgumentException("user password hash should not be changed to blank"); }
         this.passwordHash = passwordHash;
-    }
-
-    public void setBirthDate(LocalDate birthDate) {
-
-        this.birthDate = Objects.requireNonNull(birthDate, "user birth date should not be changed to null");
     }
 
     public void setRole(UserRole role) {
