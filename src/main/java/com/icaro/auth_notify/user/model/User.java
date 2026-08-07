@@ -36,7 +36,7 @@ public class User implements UserDetails {
     private String passwordHash;
 
     @Setter
-    @Column(name = "birth_date", nullable = false)
+    @Column(name = "birth_date")
     private LocalDate birthDate;
 
     @Enumerated(EnumType.STRING)
@@ -72,7 +72,7 @@ public class User implements UserDetails {
         }
         this.passwordHash = passwordHash;
 
-        this.birthDate = Objects.requireNonNull(birthDate, "user birth date should not be null");
+        this.birthDate = birthDate;
 
         if(name.isBlank()) { throw new IllegalArgumentException("user name should not be blank"); }
         if(email.isBlank()) { throw new IllegalArgumentException("user email should not be blank"); }

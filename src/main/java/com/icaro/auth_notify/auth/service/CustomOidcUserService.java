@@ -26,7 +26,7 @@ public class CustomOidcUserService extends OidcUserService {
                 .orElseGet(() ->
                     {
                         User user = User.builder()
-                                .name(oidcUser.getName())
+                                .name(oidcUser.getFullName())
                                 .email(oidcUser.getEmail())
                                 .passwordHash(null)
                                 .birthDate(null)
