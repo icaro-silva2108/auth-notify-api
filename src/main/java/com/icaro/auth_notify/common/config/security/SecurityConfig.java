@@ -1,11 +1,11 @@
 package com.icaro.auth_notify.common.config.security;
 
+import com.icaro.auth_notify.auth.service.CustomOidcUserService;
 import com.icaro.auth_notify.auth.service.CustomUserDetailsService;
 import com.icaro.auth_notify.auth.filter.JwtAuthFilter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,11 +28,17 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final CustomOidcUserService oidcUserService;
+    private final OAuth2AuthenticationSuccessHandler successHandler;
+
+    // PASSWORD ENCODER
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    // AUTHENTICATION TOOLS
 
     @Bean
     public AuthenticationProvider customAuthenticationProvider(
@@ -51,6 +57,8 @@ public class SecurityConfig {
 
         return configuration.getAuthenticationManager();
     }
+
+    // FILTER CHAIN
 
     @Bean
     public SecurityFilterChain filterChain(
@@ -88,7 +96,13 @@ public class SecurityConfig {
                                 // OTHERS
                                 .anyRequest().authenticated()
                 )
-                .oauth2Login(Customizer.withDefaults())
+                .oauth2Login(oauth2 ->
+                        oauth2
+                                .userInfoEndpoint(
+                                        userInfo ->
+                                                userInfo.oidcUserService(oidcUserService)
+                                )
+                                .successHandler(successHandler))
                 .headers(
                         headers -> headers
                                 .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
