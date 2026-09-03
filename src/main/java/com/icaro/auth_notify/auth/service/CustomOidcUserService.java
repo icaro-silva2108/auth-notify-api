@@ -1,6 +1,6 @@
 package com.icaro.auth_notify.auth.service;
 
-import com.icaro.auth_notify.messaging.dto.UserCreatedEventDTO;
+import com.icaro.auth_notify.messaging.dto.UserEventDTO;
 import com.icaro.auth_notify.messaging.publisher.UserEventPublisher;
 import com.icaro.auth_notify.user.model.User;
 import com.icaro.auth_notify.user.model.enums.AuthProvider;
@@ -36,9 +36,10 @@ public class CustomOidcUserService extends OidcUserService {
                                 .build();
 
                         eventPublisher.publishUserCreated(
-                                new UserCreatedEventDTO(
+                                new UserEventDTO(
                                         user.getName(),
-                                        user.getEmail()
+                                        user.getEmail(),
+                                        "user.created"
                                 )
                         );
 
