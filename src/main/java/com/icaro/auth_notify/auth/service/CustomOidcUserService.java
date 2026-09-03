@@ -1,5 +1,7 @@
 package com.icaro.auth_notify.auth.service;
 
+import com.icaro.auth_notify.messaging.dto.UserCreatedEventDTO;
+import com.icaro.auth_notify.messaging.publisher.UserEventPublisher;
 import com.icaro.auth_notify.user.model.User;
 import com.icaro.auth_notify.user.model.enums.AuthProvider;
 import com.icaro.auth_notify.user.repository.UserRepository;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class CustomOidcUserService extends OidcUserService {
 
     private final UserRepository userRepository;
+    private final UserEventPublisher eventPublisher;
 
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
@@ -31,6 +34,14 @@ public class CustomOidcUserService extends OidcUserService {
                                 .passwordHash(null)
                                 .birthDate(null)
                                 .build();
+
+                        eventPublisher.publishUserCreated(
+                                new UserCreatedEventDTO(
+                                        user.getName(),
+                                        user.getEmail()
+                                )
+                        );
+
                         return userRepository.save(user);
                     }
                 );

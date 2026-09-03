@@ -2,6 +2,8 @@ package com.icaro.auth_notify.user.service;
 
 import com.icaro.auth_notify.common.exceptions.InvalidPasswordException;
 import com.icaro.auth_notify.common.exceptions.ResourceNotFoundException;
+import com.icaro.auth_notify.messaging.dto.UserCreatedEventDTO;
+import com.icaro.auth_notify.messaging.publisher.UserEventPublisher;
 import com.icaro.auth_notify.user.model.User;
 import com.icaro.auth_notify.user.model.dto.UserRequestDTO;
 import com.icaro.auth_notify.user.model.dto.UserResponseDTO;
@@ -25,6 +27,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserEventPublisher eventPublisher;
 
     // UTILITIES
 
@@ -65,6 +68,14 @@ public class UserService {
         user.getProviders().add(AuthProvider.LOCAL);
 
         User saved = userRepository.save(user);
+
+        eventPublisher.publishUserCreated(
+                new UserCreatedEventDTO(
+                        saved.getName(),
+                        saved.getEmail()
+                )
+        );
+
         return toResponseDTO(saved);
     }
 

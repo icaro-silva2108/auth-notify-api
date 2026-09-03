@@ -6,6 +6,7 @@ import com.icaro.auth_notify.user.service.AdminUserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -23,6 +24,7 @@ public class AdminUserController {
 
     @GetMapping
     public ResponseEntity<Page<UserResponseDTO>> findAllUsers(
+            @ParameterObject
             @PageableDefault(size = 20) Pageable pageable) {
 
         return ResponseEntity

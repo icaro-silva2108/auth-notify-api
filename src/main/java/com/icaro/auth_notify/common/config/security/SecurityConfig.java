@@ -91,7 +91,7 @@ public class SecurityConfig {
                                 .requestMatchers("/actuator/health", "/actuator/info/**").permitAll()
 
                                 // H2
-                                .requestMatchers("/h2-console/**").permitAll()
+                                .requestMatchers("/h2-console", "/h2-console/**").permitAll()
 
                                 // OTHERS
                                 .anyRequest().authenticated()
