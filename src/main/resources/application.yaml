@@ -8,6 +8,11 @@ spring:
     username: sa
     password:
 
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+
   h2:
     console:
       enabled: true
@@ -25,6 +30,12 @@ spring:
               - profile
               - email
 
+  rabbitmq:
+    addresses: ${CLOUD_AMQP_URL}
+    username: ${CLOUD_AMQP_USERNAME}
+    password: ${CLOUD_AMQP_PASSWORD}
+    virtual-host: ${CLOUD_AMQP_VIRTUAL_HOST}
+
 management:
   endpoints:
     web:
@@ -34,3 +45,6 @@ management:
 jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000
+
+server:
+  port: 8080
