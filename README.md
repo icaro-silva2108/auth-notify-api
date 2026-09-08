@@ -12,10 +12,9 @@ Project built for authentication/authorization and messaging(events design) lear
 - BCrypt
 - Spring Data JPA
 
-### 🔜Future Implementations
+### 🐇RabbitMQ Section
 
-- Event Design
-- Message Broker(RabbitMQ)
+The messaging service using RabbitMQ can be found on [`Email Sender`](https://github.com/icaro-silva2108/auth-notify-email-sender) repository.
 
 # 🔒Authentication and Authorization
 
