@@ -3,6 +3,8 @@ package com.icaro.auth_notify.user.service;
 import com.icaro.auth_notify.common.exceptions.InvalidPasswordException;
 import com.icaro.auth_notify.common.exceptions.ResourceNotFoundException;
 import com.icaro.auth_notify.messaging.dto.UserEventDTO;
+import com.icaro.auth_notify.messaging.dto.UserEventMessageDTO;
+import com.icaro.auth_notify.messaging.enums.UserEventType;
 import com.icaro.auth_notify.messaging.publisher.UserEventPublisher;
 import com.icaro.auth_notify.user.model.User;
 import com.icaro.auth_notify.user.model.dto.UserRequestDTO;
@@ -17,6 +19,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
 
@@ -28,6 +32,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserEventPublisher eventPublisher;
+    private final ObjectMapper objectMapper;
 
     // UTILITIES
 
@@ -69,11 +74,17 @@ public class UserService {
 
         User saved = userRepository.save(user);
 
-        eventPublisher.publishUserCreated(
+
+        JsonNode payload = objectMapper.valueToTree(
                 new UserEventDTO(
-                        saved.getName(),
-                        saved.getEmail(),
-                        "user.created"
+                    saved.getName(),
+                    saved.getEmail()
+                )
+        );
+        eventPublisher.publishUserCreated(
+                new UserEventMessageDTO(
+                    UserEventType.USER_CREATED,
+                    payload
                 )
         );
 
@@ -112,11 +123,17 @@ public class UserService {
 
         User saved = userRepository.save(user);
 
-        eventPublisher.publishUserUpdated(
+        JsonNode payload = objectMapper.valueToTree(
                 new UserEventDTO(
                         saved.getName(),
-                        saved.getEmail(),
-                        "user.updated"
+                        saved.getEmail()
+                )
+        );
+
+        eventPublisher.publishUserUpdated(
+                new UserEventMessageDTO(
+                        UserEventType.USER_UPDATED,
+                        payload
                 )
         );
 

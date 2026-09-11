@@ -5,6 +5,8 @@ import com.icaro.auth_notify.messaging.publisher.UserEventPublisher;
 import com.icaro.auth_notify.user.model.User;
 import com.icaro.auth_notify.user.model.enums.AuthProvider;
 import com.icaro.auth_notify.user.repository.UserRepository;
+import com.icaro.auth_notify.messaging.dto.UserEventMessageDTO;
+import com.icaro.auth_notify.messaging.enums.UserEventType;
 
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
@@ -12,6 +14,8 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +23,7 @@ public class CustomOidcUserService extends OidcUserService {
 
     private final UserRepository userRepository;
     private final UserEventPublisher eventPublisher;
+    private final ObjectMapper objectMapper;
 
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
@@ -35,11 +40,17 @@ public class CustomOidcUserService extends OidcUserService {
                                 .birthDate(null)
                                 .build();
 
-                        eventPublisher.publishUserCreated(
-                                new UserEventDTO(
+                        JsonNode payload = objectMapper.valueToTree(
+                                new UserEventDTO (
                                         user.getName(),
-                                        user.getEmail(),
-                                        "user.created"
+                                        user.getEmail()
+                                )
+                        );
+
+                        eventPublisher.publishUserCreated(
+                                new UserEventMessageDTO(
+                                        UserEventType.USER_CREATED,
+                                        payload
                                 )
                         );
 
