@@ -29,4 +29,13 @@ public class UserEventPublisher {
                 event
         );
     }
+
+    public void publishUserRoleChanged(UserEventMessageDTO event) {
+
+        rabbitTemplate.convertAndSend(
+                "user-events-exchange",
+                "user.role.changed",
+                event
+        );
+    }
 }

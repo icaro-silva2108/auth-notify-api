@@ -1,6 +1,10 @@
 package com.icaro.auth_notify.user.service;
 
 import com.icaro.auth_notify.common.exceptions.ResourceNotFoundException;
+import com.icaro.auth_notify.messaging.dto.UserEventMessageDTO;
+import com.icaro.auth_notify.messaging.dto.UserRoleChangedEventDTO;
+import com.icaro.auth_notify.messaging.enums.UserEventType;
+import com.icaro.auth_notify.messaging.publisher.UserEventPublisher;
 import com.icaro.auth_notify.user.model.User;
 import com.icaro.auth_notify.user.model.dto.UserResponseDTO;
 import com.icaro.auth_notify.user.model.enums.UserRole;
@@ -12,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 
 @Service
@@ -20,6 +26,8 @@ import org.springframework.data.domain.Pageable;
 public class AdminUserService {
 
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
+    private final UserEventPublisher eventPublisher;
 
     // UTILITIES
 
@@ -68,7 +76,23 @@ public class AdminUserService {
         }
 
         user.setRole(role);
-        userRepository.save(user);
+        User saved = userRepository.save(user);
+
+        JsonNode payload = objectMapper.valueToTree(
+                new UserRoleChangedEventDTO(
+                        saved.getName(),
+                        saved.getEmail(),
+                        saved.getRole()
+                )
+        );
+
+        eventPublisher.publishUserRoleChanged(
+                new UserEventMessageDTO(
+                        UserEventType.USER_ROLE_CHANGED,
+                        payload
+                )
+        );
+
         return toResponseDTO(user);
     }
 
