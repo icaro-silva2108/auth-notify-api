@@ -147,7 +147,21 @@ public class UserService {
         }
 
         user.setActive(false);
-        userRepository.save(user);
+        User saved = userRepository.save(user);
+
+        JsonNode payload = objectMapper.valueToTree(
+                new UserEventDTO(
+                        saved.getName(),
+                        saved.getEmail()
+                )
+        );
+
+        eventPublisher.publishUserDeactivated(
+                new UserEventMessageDTO(
+                        UserEventType.USER_DEACTIVATED,
+                        payload
+                )
+        );
     }
 
     @Transactional(readOnly = true)
