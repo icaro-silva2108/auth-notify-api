@@ -1,0 +1,43 @@
+version: "latest"
+
+services:
+
+  postgres:
+    image: postgres:18
+    container_name: auth-notify-db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+    - "5432:5432"
+    volumes:
+    - postgres_data:/var/lib/postgresql/18/docker
+
+  app:
+    build: .
+    container_name: auth-notify-app
+    depends_on:
+      - postgres
+    environment:
+      # JWT Secret
+      JWT_SECRET: ${JWT_SECRET}
+
+      # GCP
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+
+      # Cloud AMQP
+      CLOUD_AMQP_URL: ${CLOUD_AMQP_URL}
+      CLOUD_AMQP_USERNAME: ${CLOUD_AMQP_USERNAME}
+      CLOUD_AMQP_PASSWORD: ${CLOUD_AMQP_PASSWORD}
+      CLOUD_AMQP_VIRTUAL_HOST: ${CLOUD_AMQP_VIRTUAL_HOST}
+
+      # PostgreSQL
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:8080"
+volumes:
+  postgres_data:
