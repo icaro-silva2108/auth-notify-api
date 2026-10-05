@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN ./mvnw clean package -e
+RUN ./mvnw clean package
 
 FROM eclipse-temurin:21-jre
 
