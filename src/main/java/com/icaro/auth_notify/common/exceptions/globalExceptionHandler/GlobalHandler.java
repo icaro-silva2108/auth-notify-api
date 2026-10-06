@@ -6,6 +6,8 @@ import com.icaro.auth_notify.common.exceptions.globalExceptionHandler.model.Inva
 import com.icaro.auth_notify.common.exceptions.globalExceptionHandler.model.InvalidArgumentsMessageDTO;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -84,6 +86,17 @@ public class GlobalHandler {
         return ResponseEntity.status(401).body(message);
     }
 
+    @ExceptionHandler(InsufficientAuthenticationException.class)
+    public ResponseEntity<ErrorMessageDTO> insufficientAuthenticationHandler(InsufficientAuthenticationException error) {
+
+        ErrorMessageDTO message = new ErrorMessageDTO(
+                LocalDateTime.now(),
+                401,
+                "JWT token invalid or not found"
+        );
+        return ResponseEntity.status(401).body(message);
+    }
+
     // RESOURCES NOT FOUND HANDLERS
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -143,5 +156,18 @@ public class GlobalHandler {
                 error.getMessage()
         );
         return ResponseEntity.status(422).body(message);
+    }
+
+    // FORBIDDEN HANDLERS
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorMessageDTO> accessDeniedHandler(AccessDeniedException error) {
+
+        ErrorMessageDTO message = new ErrorMessageDTO(
+                LocalDateTime.now(),
+                403,
+                "forbidden access"
+        );
+        return ResponseEntity.status(403).body(message);
     }
 }

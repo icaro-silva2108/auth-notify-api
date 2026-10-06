@@ -3,6 +3,9 @@ package com.icaro.auth_notify.common.config.security;
 import com.icaro.auth_notify.auth.service.CustomOidcUserService;
 import com.icaro.auth_notify.auth.service.CustomUserDetailsService;
 import com.icaro.auth_notify.auth.filter.JwtAuthFilter;
+import com.icaro.auth_notify.common.exceptions.globalExceptionHandler.entrypoints.DelegatingAccessDeniedHandler;
+import com.icaro.auth_notify.common.exceptions.globalExceptionHandler.entrypoints.DelegatingAuthenticationEntrypoint;
+
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +33,8 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomOidcUserService oidcUserService;
     private final OAuth2AuthenticationSuccessHandler successHandler;
+    private final DelegatingAuthenticationEntrypoint authEntrypoint;
+    private final DelegatingAccessDeniedHandler accessDeniedHandler;
 
     // PASSWORD ENCODER
 
@@ -109,6 +114,11 @@ public class SecurityConfig {
                 )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(
+                        exception -> exception
+                                .authenticationEntryPoint(authEntrypoint)
+                                .accessDeniedHandler(accessDeniedHandler)
+                )
                 .build();
     }
 }
