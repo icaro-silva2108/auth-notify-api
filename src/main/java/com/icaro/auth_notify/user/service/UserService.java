@@ -78,7 +78,8 @@ public class UserService {
         JsonNode payload = objectMapper.valueToTree(
                 new UserEventDTO(
                     saved.getName(),
-                    saved.getEmail()
+                    saved.getEmail(),
+                    0
                 )
         );
         eventPublisher.publishUserCreated(
@@ -126,7 +127,8 @@ public class UserService {
         JsonNode payload = objectMapper.valueToTree(
                 new UserEventDTO(
                         saved.getName(),
-                        saved.getEmail()
+                        saved.getEmail(),
+                        0
                 )
         );
 
@@ -152,7 +154,8 @@ public class UserService {
         JsonNode payload = objectMapper.valueToTree(
                 new UserEventDTO(
                         saved.getName(),
-                        saved.getEmail()
+                        saved.getEmail(),
+                        0
                 )
         );
 

@@ -43,7 +43,8 @@ public class CustomOidcUserService extends OidcUserService {
                         JsonNode payload = objectMapper.valueToTree(
                                 new UserEventDTO (
                                         user.getName(),
-                                        user.getEmail()
+                                        user.getEmail() ,
+                                        0
                                 )
                         );
 
