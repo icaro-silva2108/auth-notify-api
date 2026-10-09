@@ -1,11 +1,12 @@
-package com.icaro.login_system;
+package com.icaro.auth_notify;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootConfiguration
 @SpringBootTest
+@ActiveProfiles("test")
 class AuthNotifyApplicationTests {
 
 	@Test
