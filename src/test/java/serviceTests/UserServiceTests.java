@@ -1,5 +1,7 @@
 package serviceTests;
 
+import com.icaro.auth_notify.common.exceptions.EmailAlreadyExistsException;
+import com.icaro.auth_notify.common.exceptions.InvalidAgeException;
 import com.icaro.auth_notify.messaging.dto.UserEventMessageDTO;
 import com.icaro.auth_notify.messaging.enums.UserEventType;
 import com.icaro.auth_notify.user.model.User;
@@ -23,8 +25,7 @@ import org.mockito.Spy;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -79,7 +80,7 @@ public class UserServiceTests {
     // CREATE USER TEST METHODS
 
     @Test
-    public void createUserSuccessTest() {
+    void createUserSuccessTest() {
 
         when(userRepository.existsByEmail(request.email()))
                 .thenReturn(false);
@@ -113,5 +114,33 @@ public class UserServiceTests {
         assertEquals(UserEventType.USER_CREATED, eventCaptor.getValue().type());
         assertEquals("test", payload.path("name").asString());
         assertEquals("test@test.com", payload.path("userEmail").asString());
+    }
+
+    @Test
+    void createUserEmailConflictThrowsError() {
+
+        when(userRepository.existsByEmail(user.getEmail()))
+                .thenReturn(true);
+
+        assertThrows(
+                EmailAlreadyExistsException.class,
+                () -> userService.createUser(request)
+        );
+    }
+
+    @Test
+    void createUserInvalidBirthDateThrowsError() {
+
+        UserRequestDTO invalidBirthDateRequest = new UserRequestDTO(
+                "test",
+                "test@test.com",
+                "test1234",
+                LocalDate.now().minusYears(13)
+        );
+
+        assertThrows(
+                InvalidAgeException.class,
+                () -> userService.createUser(invalidBirthDateRequest)
+        );
     }
 }
