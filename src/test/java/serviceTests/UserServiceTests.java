@@ -7,6 +7,7 @@ import com.icaro.auth_notify.messaging.enums.UserEventType;
 import com.icaro.auth_notify.user.model.User;
 import com.icaro.auth_notify.user.model.dto.UserRequestDTO;
 import com.icaro.auth_notify.user.model.dto.UserResponseDTO;
+import com.icaro.auth_notify.user.model.dto.UserUpdateDTO;
 import com.icaro.auth_notify.user.model.enums.AuthProvider;
 import com.icaro.auth_notify.user.repository.UserRepository;
 import com.icaro.auth_notify.messaging.publisher.UserEventPublisher;
@@ -54,17 +55,25 @@ public class UserServiceTests {
 
     // SETUP
 
-    private UserRequestDTO request;
+    private UserRequestDTO createUserRequest;
+    private UserUpdateDTO updateUserRequest;
     private User user;
 
     @BeforeEach
     public void setup() {
 
-        request = new UserRequestDTO(
+        createUserRequest = new UserRequestDTO(
             "test",
             "test@test.com",
             "test1234",
             LocalDate.of(2000, 1, 1)
+        );
+
+        updateUserRequest = new UserUpdateDTO(
+                "newUser",
+                "new@email.com",
+                "newPasswordHash",
+                LocalDate.of(2000, 2, 2)
         );
 
         user = User.builder()
@@ -82,10 +91,10 @@ public class UserServiceTests {
     @Test
     void createUserSuccessTest() {
 
-        when(userRepository.existsByEmail(request.email()))
+        when(userRepository.existsByEmail(createUserRequest.email()))
                 .thenReturn(false);
 
-        when(passwordEncoder.encode(request.password()))
+        when(passwordEncoder.encode(createUserRequest.password()))
                 .thenReturn("passwordHash");
 
         when(userRepository.save(any(User.class)))
@@ -95,7 +104,7 @@ public class UserServiceTests {
                     return u;
                 });
 
-        UserResponseDTO response = userService.createUser(request);
+        UserResponseDTO response = userService.createUser(createUserRequest);
 
         assertEquals(1L, response.id());
         assertEquals("test", response.name());
@@ -112,8 +121,8 @@ public class UserServiceTests {
         JsonNode payload = eventCaptor.getValue().payload();
 
         assertEquals(UserEventType.USER_CREATED, eventCaptor.getValue().type());
-        assertEquals("test", payload.path("name").asString());
-        assertEquals("test@test.com", payload.path("userEmail").asString());
+        assertEquals(response.name(), payload.path("name").asString());
+        assertEquals(response.email(), payload.path("userEmail").asString());
     }
 
     @Test
@@ -124,14 +133,14 @@ public class UserServiceTests {
 
         assertThrows(
                 EmailAlreadyExistsException.class,
-                () -> userService.createUser(request)
+                () -> userService.createUser(createUserRequest)
         );
     }
 
     @Test
-    void createUserInvalidBirthDateThrowsError() {
+    void createUserInvalidAgeThrowsError() {
 
-        UserRequestDTO invalidBirthDateRequest = new UserRequestDTO(
+        UserRequestDTO invalidAgeRequest = new UserRequestDTO(
                 "test",
                 "test@test.com",
                 "test1234",
@@ -140,7 +149,66 @@ public class UserServiceTests {
 
         assertThrows(
                 InvalidAgeException.class,
-                () -> userService.createUser(invalidBirthDateRequest)
+                () -> userService.createUser(invalidAgeRequest)
+        );
+    }
+
+    // UPDATE USER TEST METHODS
+
+    @Test
+    void updateUserSuccessTest() {
+
+        when(userRepository.existsByEmail(updateUserRequest.email()))
+                .thenReturn(false);
+
+        when(passwordEncoder.encode(updateUserRequest.password()))
+                .thenReturn("newPasswordHash");
+
+        when(userRepository.save(user))
+                .thenReturn(user);
+
+        UserResponseDTO response = userService.updateUser(updateUserRequest, user);
+
+        assertEquals(response.id(), user.getId());
+        assertEquals(response.name(), user.getName());
+        assertEquals(response.email(), user.getEmail());
+        assertEquals(response.birthDate(), user.getBirthDate());
+        assertEquals("newPasswordHash", user.getPasswordHash());
+
+        ArgumentCaptor<UserEventMessageDTO> eventCaptor = ArgumentCaptor.forClass(UserEventMessageDTO.class);
+        verify(eventPublisher).publishUserUpdated(eventCaptor.capture());
+        JsonNode payload = eventCaptor.getValue().payload();
+
+        assertEquals(UserEventType.USER_UPDATED, eventCaptor.getValue().type());
+        assertEquals(response.name(), payload.path("name").asString());
+        assertEquals(response.email(), payload.path("userEmail").asString());
+    }
+
+    @Test
+    void updateUserEmailConflictThrowsError() {
+
+        when(userRepository.existsByEmail(updateUserRequest.email()))
+                .thenReturn(true);
+
+        assertThrows(
+                EmailAlreadyExistsException.class,
+                () -> userService.updateUser(updateUserRequest, user)
+        );
+    }
+
+    @Test
+    void updateUserInvalidAgeThrowsError() {
+
+        UserUpdateDTO invalidAgeRequest = new UserUpdateDTO(
+                "newUser",
+                "new@email.com",
+                "newPasswordHash",
+                LocalDate.now().minusYears(13)
+        );
+
+        assertThrows(
+                InvalidAgeException.class,
+                () -> userService.updateUser(invalidAgeRequest, user)
         );
     }
 }
