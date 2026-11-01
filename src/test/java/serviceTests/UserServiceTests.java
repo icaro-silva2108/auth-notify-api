@@ -211,4 +211,35 @@ public class UserServiceTests {
                 () -> userService.updateUser(invalidAgeRequest, user)
         );
     }
+
+    // DELETE USER TEST METHODS
+
+    @Test
+    void deleteUserSuccessTest() {
+
+        when(userRepository.save(user))
+                .thenReturn(user);
+
+        userService.deleteUser(user);
+        assertFalse(user.isActive());
+
+        ArgumentCaptor<UserEventMessageDTO> eventCaptor = ArgumentCaptor.forClass(UserEventMessageDTO.class);
+        verify(eventPublisher).publishUserDeactivated(eventCaptor.capture());
+        JsonNode payload = eventCaptor.getValue().payload();
+
+        assertEquals(UserEventType.USER_DEACTIVATED, eventCaptor.getValue().type());
+        assertEquals(user.getName(), payload.path("name").asString());
+        assertEquals(user.getEmail(), payload.path("userEmail").asString());
+    }
+
+    @Test
+    void deleteUserAlreadyDeactivatedThrowsError() {
+
+        user.setActive(false);
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> userService.deleteUser(user)
+        );
+    }
 }
