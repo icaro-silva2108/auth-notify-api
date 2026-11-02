@@ -2,6 +2,7 @@ package serviceTests;
 
 import com.icaro.auth_notify.common.exceptions.EmailAlreadyExistsException;
 import com.icaro.auth_notify.common.exceptions.InvalidAgeException;
+import com.icaro.auth_notify.common.exceptions.ResourceNotFoundException;
 import com.icaro.auth_notify.messaging.dto.UserEventMessageDTO;
 import com.icaro.auth_notify.messaging.enums.UserEventType;
 import com.icaro.auth_notify.user.model.User;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTests {
@@ -240,6 +242,20 @@ public class UserServiceTests {
         assertThrows(
                 IllegalStateException.class,
                 () -> userService.deleteUser(user)
+        );
+    }
+
+    // FIND USER TEST METHODS
+
+    @Test
+    void notFoundUserThrowsError() {
+
+        when(userRepository.findById(user.getId()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> userService.findUser(user)
         );
     }
 }
