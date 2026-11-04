@@ -133,10 +133,12 @@ public class UserServiceTests {
         when(userRepository.existsByEmail(user.getEmail()))
                 .thenReturn(true);
 
-        assertThrows(
+        Exception exception = assertThrows(
                 EmailAlreadyExistsException.class,
                 () -> userService.createUser(createUserRequest)
         );
+
+        assertEquals("this email is already in use", exception.getMessage());
     }
 
     @Test
@@ -149,10 +151,12 @@ public class UserServiceTests {
                 LocalDate.now().minusYears(13)
         );
 
-        assertThrows(
+        Exception exception = assertThrows(
                 InvalidAgeException.class,
                 () -> userService.createUser(invalidAgeRequest)
         );
+
+        assertEquals("user must be at least 14 years old", exception.getMessage());
     }
 
     // UPDATE USER TEST METHODS
@@ -192,10 +196,12 @@ public class UserServiceTests {
         when(userRepository.existsByEmail(updateUserRequest.email()))
                 .thenReturn(true);
 
-        assertThrows(
+        Exception exception = assertThrows(
                 EmailAlreadyExistsException.class,
                 () -> userService.updateUser(updateUserRequest, user)
         );
+
+        assertEquals("this email is already in use", exception.getMessage());
     }
 
     @Test
@@ -208,10 +214,12 @@ public class UserServiceTests {
                 LocalDate.now().minusYears(13)
         );
 
-        assertThrows(
+        Exception exception = assertThrows(
                 InvalidAgeException.class,
                 () -> userService.updateUser(invalidAgeRequest, user)
         );
+
+        assertEquals("user must be at least 14 years old", exception.getMessage());
     }
 
     // DELETE USER TEST METHODS
@@ -239,10 +247,12 @@ public class UserServiceTests {
 
         user.setActive(false);
 
-        assertThrows(
+        Exception exception = assertThrows(
                 IllegalStateException.class,
                 () -> userService.deleteUser(user)
         );
+
+        assertEquals("user is already inactive", exception.getMessage());
     }
 
     // FIND USER TEST METHODS
@@ -253,9 +263,11 @@ public class UserServiceTests {
         when(userRepository.findById(user.getId()))
                 .thenReturn(Optional.empty());
 
-        assertThrows(
+        Exception exception = assertThrows(
                 ResourceNotFoundException.class,
                 () -> userService.findUser(user)
         );
+
+        assertEquals("user not found", exception.getMessage());
     }
 }
